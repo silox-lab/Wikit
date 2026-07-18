@@ -1,4 +1,5 @@
-#include "../include/utils.h"
+#include "../include/globals.h"
+#include <stdlib.h>
 
 static WinList G_WIN_LIST;
 static char *WSTORAGE_PATH;
