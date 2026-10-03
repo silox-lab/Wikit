@@ -1,23 +1,15 @@
+/*
+ * SPDX-FileCopyrightText: 2026 silox-lab
+ *
+ * SPDX-License-Identifier: MIT
+*/
+
 #ifndef UTILS
 #define UTILS
-#include <ncurses.h>
-#include <stdlib.h>
+#include <ftw.h>
 
-typedef struct {
-  WINDOW *win;
-  char *tag;
-} WinAndInfo;
-
-typedef struct {
-  WinAndInfo **list;
-  int length;
-  int capacity;
-} WinList;
-
-extern WinList *win_list;
-
-void win_list_init();
-void win_list_add(WINDOW *win, char *tag);
-void win_list_free();
+char *get_user();
+int remove_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
+int remove_directory_recursive(const char *path);
 
 #endif

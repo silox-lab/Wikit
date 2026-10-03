@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2026 silox-lab
+ *
+ * SPDX-License-Identifier: MIT
+*/
 #ifndef WIDGETS
 #define WIDGETS
 #include <ncurses.h>

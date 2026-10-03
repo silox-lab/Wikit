@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2026 silox-lab
+ *
+ * SPDX-License-Identifier: MIT
+*/
 #define _XOPEN_SOURCE_EXTENDED 1
 #include <ncurses.h>
 

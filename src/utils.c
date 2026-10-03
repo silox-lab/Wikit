@@ -1,32 +1,35 @@
-#include "../include/utils.h"
-#include <ncurses.h>
+/*
+ * SPDX-FileCopyrightText: 2026 silox-lab
+ *
+ * SPDX-License-Identifier: MIT
+*/
+#define _XOPEN_SOURCE 500
+#define _POSIX_C_SOURCE 200809L
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #include <stdlib.h>
+#include <ftw.h>
 
-WinList *win_list;
-
-void win_list_init() {
-  win_list->capacity = 10;
-  win_list->length = 0;
-  win_list->list = malloc(win_list->capacity * sizeof(WinAndInfo *));
+char *get_user() {
+    struct passwd *p = getpwuid(getuid());
+    if (p == NULL) return NULL;
+    return p->pw_name;
 }
 
-void win_list_add(WINDOW *win, char *tag) {
-  if (win_list->length >= win_list->capacity) {
-    win_list->list = realloc(win_list->list, win_list->capacity * 2);
-  }
-
-  WinAndInfo *win_info = malloc(sizeof(WinAndInfo));
-
-  win_info->win = win;
-  win_info->tag = tag;
-
-  win_list->list[win_list->length] = win_info;
-  win_list->length++;
+int remove_cb(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf) {
+    int rv = remove(fpath);
+    
+    if (rv) {
+        return 1;
+    }
+    
+    return 0;
 }
 
-void win_list_free() {
-  for (int i = 0; i < win_list->length; i++) {
-    free(win_list[i].list);
-  }
-  win_list->list = NULL;
+int remove_directory_recursive(const char *path) {
+    return nftw(path, remove_cb, 64, FTW_DEPTH | FTW_PHYS);
 }
