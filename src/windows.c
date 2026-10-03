@@ -1,3 +1,8 @@
+/*
+ * SPDX-FileCopyrightText: 2026 silox-lab
+ *
+ * SPDX-License-Identifier: MIT
+*/
 #include "../include/globals.h"
 #include <stdlib.h>
 #include <string.h>
