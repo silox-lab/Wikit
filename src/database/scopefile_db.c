@@ -283,6 +283,11 @@ Result delete_scopefile_db(int64_t id) {
 
 Result update_scopefile_db(char *name, int64_t scope_id, ScopeFile sf) {
 
+  Result update_sf = update_scopefile(name, scope_id, sf.name, sf.extension);
+  if (update_sf.type != SUCCESS) {
+    return (Result) { .type = update_sf.type, .value = update_sf.value };
+  }
+
   sqlite3 *db = GET_W_DATABASE();
   sqlite3_stmt *update_scopefile_stmt;
 

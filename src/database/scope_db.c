@@ -295,6 +295,11 @@ Result delete_scope_db(int64_t id) {
 
 Result update_scope_db(int64_t id, Scope s) {
 
+  Result update_s = update_scope(id, s.name);
+  if (update_s.type != SUCCESS) {
+    return (Result) { .type = update_s.type, .value = update_s.value };
+  }
+  
   sqlite3 *db = GET_W_DATABASE();
   sqlite3_stmt *update_scope_stmt;
 
