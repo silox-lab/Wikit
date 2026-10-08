@@ -58,7 +58,6 @@ void run_event_loop(void)
     }
 
     Wiki w = {
-        .created_on  = 123456953,
         .description = "generator guide",
         .name        = "energy"
     };
@@ -113,7 +112,6 @@ void run_event_loop(void)
     Wiki *wiki = wiki_arr[0];
 
     Scope s = {
-        .created_on      = 123456953,
         .name            = "lithium ion",
         .parent_scope_id = 0,
         .wiki_id         = wiki->id
@@ -170,7 +168,6 @@ void run_event_loop(void)
     Scope *scope1 = scope_arr[0];
 
     Scope s2 = {
-        .created_on      = 123456953,
         .name            = "ion3",
         .parent_scope_id = scope1->id,
         .wiki_id         = wiki->id
@@ -227,7 +224,6 @@ void run_event_loop(void)
     Scope *scope2 = scope2_arr[0];
     
     ScopeFile sf = {
-        .created_on = 123456953,
         .name       = "hello_world",
         .scope_id   = scope2->id,
         .extension  = "txt"

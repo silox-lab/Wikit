@@ -12,5 +12,6 @@ Result get_scopefile(char *path, char *name);
 Result delete_scopefile(char *path, char *name);
 Result build_scopefile_path(ScopeFile sf);
 Result make_scopefile(ScopeFile sf);
+Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_extension);
 
 #endif

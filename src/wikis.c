@@ -78,3 +78,28 @@ Result delete_wiki(char *name) {
 
   return (Result) { .type = SUCCESS, .value = "" };
 }
+
+Result update_wiki(char *name, char *new_name) {
+  char wiki_path[256];
+  snprintf(wiki_path, sizeof(wiki_path), "%s/%s", GET_STORAGE_PATH(), name);
+
+  Result wiki_exist = get_wiki(name);
+  if (wiki_exist.type != SUCCESS) {
+    return (Result){ .type = SIMPLE_ERR, .value = "Wiki not found." };
+  }
+
+  Result validate_rename = get_wiki(new_name);
+  if (wiki_exist.type == SUCCESS) {
+    return (Result){ .type = SIMPLE_ERR, .value = "there are already wikis with the name you want to chose." };
+  }
+
+  char new_wiki_path[256];
+  snprintf(new_wiki_path, sizeof(new_wiki_path), "%s/%s", GET_STORAGE_PATH(), new_name);
+
+  int rename_w = rename(wiki_path, new_wiki_path);
+  if (rename_w != 0) {
+    return (Result) { .type = SIMPLE_ERR, .value = "error in renaming wiki." };
+  }
+
+  return (Result) { .type = SUCCESS, .value = "" };
+}

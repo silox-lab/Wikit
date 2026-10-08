@@ -36,8 +36,8 @@ typedef struct Wiki {
   "id integer NOT NULL PRIMARY KEY AUTOINCREMENT,"                                                        \
   "name varchar(250) NOT NULL,"                                                \
   "extension varchar(250),"                                                    \
-  "created_on int NOT NULL,"                                                   \
-  "scope_id int NOT NULL,"                                                              \
+  "created_on integer NOT NULL,"                                                   \
+  "scope_id integer NOT NULL,"                                                              \
   "FOREIGN KEY(scope_id) REFERENCES Scope(id) ON DELETE CASCADE"                                  \
   ");"
 
@@ -45,9 +45,9 @@ typedef struct Wiki {
   "CREATE TABLE IF NOT EXISTS Scope ("                                         \
   "id integer NOT NULL PRIMARY KEY AUTOINCREMENT,"                                                        \
   "name varchar(250) NOT NULL,"                                                \
-  "created_on int NOT NULL,"                                                            \
-  "wiki_id int NOT NULL,"                                                               \
-  "parent_scope_id int,"                                                       \
+  "created_on integer NOT NULL,"                                                            \
+  "wiki_id integer NOT NULL,"                                                               \
+  "parent_scope_id integer,"                                                       \
   "FOREIGN KEY(wiki_id) REFERENCES Wiki(id) ON DELETE CASCADE,"                                   \
   "FOREIGN KEY(parent_scope_id) REFERENCES Scope(id) ON DELETE CASCADE"                           \
   ");"
@@ -57,7 +57,7 @@ typedef struct Wiki {
   "id integer NOT NULL PRIMARY KEY AUTOINCREMENT,"                                                        \
   "name varchar(250) UNIQUE NOT NULL,"                                         \
   "description text NOT NULL,"                                                  \
-  "created_on int NOT NULL"                                                    \
+  "created_on integer NOT NULL"                                                    \
   ");"
 
 #endif

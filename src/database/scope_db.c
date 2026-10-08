@@ -6,12 +6,14 @@
 #include "../../include/errors.h"
 #include "../../include/globals.h"
 #include "../../include/scopefiles.h"
+#include "../../include/database/scopefile_db.h"
 #include "../../include/scopes.h"
 #include "../../include/schema.h"
 #include <stdint.h>
 #include <string.h>
 #include <sqlite3.h>
 #include <stdlib.h>
+#include <time.h>
 
 Result get_scope_db(int64_t id, int64_t wiki_id, int64_t parent_scope_id, char *name) {
 
@@ -193,7 +195,7 @@ Result create_scope_db(Scope *new_scope, Wiki *wiki) {
   }
 
   sqlite3_bind_text(create_stmt, 1, new_scope->name, -1, SQLITE_STATIC);
-  sqlite3_bind_int(create_stmt, 2, new_scope->created_on);
+  sqlite3_bind_int64(create_stmt, 2, (int64_t)time(NULL));
   if (new_scope->parent_scope_id == 0) {
     sqlite3_bind_null(create_stmt, 3);  
   }
@@ -242,12 +244,18 @@ Result create_scope_db(Scope *new_scope, Wiki *wiki) {
     return (Result) { .type = make_scope_dir.type, .value = make_scope_dir.value };
   }
 
-  ScopeFile main_sf = { .scope_id = created_scope->id, .extension = "txt", .name = "main" };
+  ScopeFile main_sf = { .scope_id = created_scope->id, .extension = "txt", .name = "main", .created_on = time(NULL) };
+
   Result make_main_sf = make_scopefile(main_sf);
-  
   if (make_main_sf.type != SUCCESS) {
     return (Result) { .type = make_main_sf.type, .value = make_main_sf.value };
   }
+
+  Result make_main_sf_db = create_scopefile_db(&main_sf);
+  if (make_main_sf_db.type != SUCCESS) {
+    return (Result) { .type = make_main_sf_db.type, .value = make_main_sf_db.value };
+  }
+
   
   return (Result){.type = SUCCESS, .value = ""};
 }

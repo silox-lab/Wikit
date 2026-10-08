@@ -11,6 +11,7 @@
 #include <string.h>
 #include <sqlite3.h>
 #include <stdlib.h>
+#include <time.h>
 
 Result get_wiki_db(char *name, int64_t id) {
 
@@ -185,7 +186,7 @@ Result create_wiki_db(Wiki *wiki) {
   
   sqlite3_bind_text(create_stmt, 1, wiki->name, -1, SQLITE_STATIC);
   sqlite3_bind_text(create_stmt, 2, wiki->description, -1, SQLITE_STATIC);
-  sqlite3_bind_int(create_stmt, 3, wiki->created_on);
+  sqlite3_bind_int64(create_stmt, 3, (int64_t)time(NULL));
 
   int step_stat = sqlite3_step(create_stmt);
   if (step_stat != SQLITE_DONE) {
