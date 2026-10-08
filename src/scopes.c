@@ -195,3 +195,58 @@ Result delete_scope(Scope s) {
 
   return (Result) { .type = SUCCESS, .value = "" };
 }
+
+Result update_scope(int64_t scope_id, char *new_name) {
+
+  Result scope_exist_db = get_scope_db(scope_id, 0, 0, NULL);
+  if (scope_exist_db.type != SUCCESS) {
+    return (Result) { .type = scope_exist_db.type, .value = scope_exist_db.value };
+  }
+
+  Scope **s_arr = scope_exist_db.value;
+  if (s_arr[0] == NULL && scope_exist_db.type == SUCCESS) {
+    return (Result) { .type = SIMPLE_ERR, .value = "scope not found" };
+  }
+
+  Result path = build_scope_path(*s_arr[0]);
+  if (path.type != SUCCESS) {
+    return (Result) { .type = path.type, .value = path.value };
+  }
+
+  Result scope_exist = get_scope(scope_id);
+  if (scope_exist.type != SUCCESS) {
+    return (Result) { .type = scope_exist.type, .value = scope_exist.value };
+  }
+
+  Scope new_s = { 
+    .id = s_arr[0]->id,
+    .parent_scope_id = s_arr[0]->parent_scope_id,
+    .created_on = s_arr[0]->created_on,
+    .wiki_id = s_arr[0]->wiki_id,
+    .name = new_name
+  };
+
+  Result new_path = build_scope_path(new_s);
+  if (new_path.type != SUCCESS) {
+    return (Result) { .type = new_path.type, .value = new_path.value };
+  }
+
+  Result validate_rename = get_scope(scope_id);
+  if (validate_rename.type == SUCCESS) {
+    return (Result) { .type = SIMPLE_ERR, .value = "there are already scopes with the name you want to chose." };
+  }
+
+  int rename_s = rename(path.value, new_path.value);
+  if (rename_s != 0) {
+    return (Result) { .type = SIMPLE_ERR, .value = "error in renaming scope." };
+  }
+
+  free(s_arr[0]->name);
+  free(s_arr[0]);
+  free(s_arr);
+
+  free(path.value);
+  free(new_path.value);
+
+  return (Result) { .type = SUCCESS, .value = "" };
+}

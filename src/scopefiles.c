@@ -4,10 +4,12 @@
  * SPDX-License-Identifier: MIT
 */
 #include <dirent.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "../include/errors.h"
 #include "../include/globals.h"
 #include "../include/database/scope_db.h"
+#include "../include/database/scopefile_db.h"
 #include "../include/scopes.h"
 #include <stdlib.h>
 #include <string.h>
@@ -118,6 +120,62 @@ Result make_scopefile(ScopeFile sf) {
   if (close(sf_fd) == -1) {
     return (Result) { .type = SIMPLE_ERR, .value = "problem in making scopefile." };
   }
+
+  return (Result) { .type = SUCCESS, .value = "" };
+}
+
+Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_extension) {
+
+  Result scopefile_exist_db = get_scopefile_db(name, scope_id);
+  if (scopefile_exist_db.type != SUCCESS) {
+    return (Result) { .type = scopefile_exist_db.type, .value = scopefile_exist_db.value };
+  }
+
+  ScopeFile **sf_arr = scopefile_exist_db.value;
+  if (sf_arr[0] == NULL && scopefile_exist_db.type == SUCCESS) {
+    return (Result) { .type = SIMPLE_ERR, .value = "scopefile not found" };
+  }
+
+  Result path = build_scopefile_path(*sf_arr[0]);
+  if (path.type != SUCCESS) {
+    return (Result) { .type = path.type, .value = path.value };
+  }
+
+  Result scopefile_exist = get_scopefile(path.value, name);
+  if (scopefile_exist.type != SUCCESS) {
+    return (Result) { .type = scopefile_exist.type, .value = scopefile_exist.value };
+  }
+
+  ScopeFile new_sf = { 
+    .id = sf_arr[0]->id,
+    .scope_id = sf_arr[0]->scope_id,
+    .created_on = sf_arr[0]->created_on,
+    .extension = new_extension,
+    .name = new_name
+  };
+
+  Result new_path = build_scopefile_path(new_sf);
+  if (new_path.type != SUCCESS) {
+    return (Result) { .type = new_path.type, .value = new_path.value };
+  }
+
+  Result validate_rename = get_scopefile(new_path.value, new_name);
+  if (validate_rename.type == SUCCESS) {
+    return (Result) { .type = SIMPLE_ERR, .value = "there are already scopefiles with the name you want to chose." };
+  }
+
+  int rename_sf = rename(path.value, new_path.value);
+  if (rename_sf != 0) {
+    return (Result) { .type = SIMPLE_ERR, .value = "error in renaming scopefile." };
+  }
+
+  free(sf_arr[0]->name);
+  free(sf_arr[0]->extension);
+  free(sf_arr[0]);
+  free(sf_arr);
+
+  free(path.value);
+  free(new_path.value);
 
   return (Result) { .type = SUCCESS, .value = "" };
 }

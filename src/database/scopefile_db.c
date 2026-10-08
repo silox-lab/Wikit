@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 Result get_scopefile_db(char *scopefile_name, int64_t scope_id)
 {
@@ -224,7 +225,7 @@ Result create_scopefile_db(ScopeFile *scopefile) {
 
   sqlite3_bind_text(create_stmt, 1, scopefile->name, -1, SQLITE_STATIC);
   sqlite3_bind_text(create_stmt, 2, scopefile->extension, -1, SQLITE_STATIC);
-  sqlite3_bind_int(create_stmt, 3, scopefile->created_on);
+  sqlite3_bind_int64(create_stmt, 3, (int64_t)time(NULL));
   sqlite3_bind_int64(create_stmt, 4, scopefile->scope_id);
 
   int step_stat = sqlite3_step(create_stmt);
@@ -278,4 +279,88 @@ Result delete_scopefile_db(int64_t id) {
   }
 
   return (Result){.type = SUCCESS, .value = ""};
+}
+
+Result update_scopefile_db(char *name, int64_t scope_id, ScopeFile sf) {
+
+  sqlite3 *db = GET_W_DATABASE();
+  sqlite3_stmt *update_scopefile_stmt;
+
+  char sql[512] = "UPDATE ScopeFile SET";
+  char update_clause[512] = "";
+  char where_clause[256] = " WHERE scope_id = ? AND name = ?;";
+
+  Result scopefile_exists = get_scopefile_db(name, scope_id);
+  if (scopefile_exists.type != SUCCESS) {
+    return (Result) { .type = scopefile_exists.type, .value = scopefile_exists.value };
+  }
+
+  if (scopefile_exists.type == SUCCESS && scopefile_exists.value == NULL) {
+    return (Result) { .type = SIMPLE_ERR, .value = "ScopeFile not found." };
+  }
+
+  for (int i=0; ((ScopeFile **)scopefile_exists.value)[i] != NULL; i++) {
+    free(((ScopeFile **)scopefile_exists.value)[i]->name);
+    free(((ScopeFile **)scopefile_exists.value)[i]->extension);
+  }
+  free(scopefile_exists.value);
+
+  int to_update = 0;
+
+  if (sf.name != NULL) to_update++;
+  if (sf.extension != NULL) to_update++;
+  
+  int added_to = 0;
+
+  if (sf.name != NULL) {
+    added_to++;
+    strcat(update_clause, " name = ?");
+    if (added_to != to_update && to_update != 1) {
+      strcat(update_clause, ",");
+    }
+  }
+
+  if (sf.extension != NULL) {
+    added_to++;
+    strcat(update_clause, " extension = ?");
+    if (added_to != to_update && to_update != 1) {
+      strcat(update_clause, ",");
+    }
+  }
+
+  strcat(sql, update_clause);
+  strcat(sql, where_clause);
+
+  int prepare_stat = sqlite3_prepare_v2(db, sql, -1, &update_scopefile_stmt, NULL);
+  if (prepare_stat != SQLITE_OK) {
+    return (Result) { .type = DB_ERR, .value = strdup(sqlite3_errmsg(db)) };
+  }
+
+  int bind_index = 1;
+  if (sf.name != NULL) {
+    sqlite3_bind_text(update_scopefile_stmt, bind_index++, sf.name, -1, SQLITE_STATIC);
+  }
+
+  
+  if (sf.extension != NULL) {
+    sqlite3_bind_text(update_scopefile_stmt, bind_index++, sf.extension, -1, SQLITE_STATIC);
+  }
+
+  sqlite3_bind_text(update_scopefile_stmt, bind_index++, name, -1, SQLITE_STATIC);
+  
+  int step_stat = sqlite3_step(update_scopefile_stmt);
+
+  if (step_stat != SQLITE_DONE) {
+    if (sqlite3_finalize(update_scopefile_stmt) != SQLITE_OK) {
+      return (Result) { .type = DB_ERR, .value = strdup(sqlite3_errmsg(db)) };
+    }
+    return (Result) { .type = DB_ERR, .value = strdup(sqlite3_errmsg(db)) };
+  }
+
+  int finalize_stat = sqlite3_finalize(update_scopefile_stmt);
+  if (finalize_stat != SQLITE_OK) {
+    return (Result){ .type = DB_ERR, .value = strdup(sqlite3_errmsg(db)) };
+  }
+
+  return (Result) { .type = SUCCESS, .value = "" };
 }
