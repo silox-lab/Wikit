@@ -455,6 +455,11 @@ Result delete_wiki_db(int64_t id) {
 
 Result update_wiki_db(char *name, Wiki w) {
 
+  Result update_w = update_wiki(name, w.name);
+  if (update_w.type != SUCCESS) {
+    return (Result) { .type = update_w.type, .value = update_w.value };
+  }
+
   sqlite3 *db = GET_W_DATABASE();
   sqlite3_stmt *update_wiki_stmt;
 

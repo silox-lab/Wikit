@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "../include/errors.h"
 #include "../include/globals.h"
+#include "../include/database/wiki_db.h"
 #include <string.h>
 #include <sys/stat.h>
 #include "../include/utils.h"
@@ -79,9 +80,14 @@ Result delete_wiki(char *name) {
   return (Result) { .type = SUCCESS, .value = "" };
 }
 
-Result update_wiki(char *name, char *new_name) {
+Result update_wiki(char *name, char *new_name) {  
   char wiki_path[256];
   snprintf(wiki_path, sizeof(wiki_path), "%s/%s", GET_STORAGE_PATH(), name);
+
+  Result wiki_exist_db = get_wiki_db(name, 0);
+  if (wiki_exist_db.type != SUCCESS) {
+    return (Result) { .type = wiki_exist_db.type, .value = wiki_exist_db.value };
+  }
 
   Result wiki_exist = get_wiki(name);
   if (wiki_exist.type != SUCCESS) {
