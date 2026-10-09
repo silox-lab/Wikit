@@ -124,7 +124,7 @@ Result make_scopefile(ScopeFile sf) {
   return (Result) { .type = SUCCESS, .value = "" };
 }
 
-Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_extension) {
+Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_extension, int64_t new_scope_id) {
 
   Result scopefile_exist_db = get_scopefile_db(name, scope_id);
   if (scopefile_exist_db.type != SUCCESS) {
@@ -148,10 +148,10 @@ Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_
 
   ScopeFile new_sf = { 
     .id = sf_arr[0]->id,
-    .scope_id = sf_arr[0]->scope_id,
+    .scope_id = scope_id == 0 ? sf_arr[0]->scope_id : new_scope_id,
     .created_on = sf_arr[0]->created_on,
-    .extension = new_extension,
-    .name = new_name
+    .extension = new_extension == NULL ? sf_arr[0]->extension : new_extension,
+    .name = new_name == NULL ? sf_arr[0]->name : new_name
   };
 
   Result new_path = build_scopefile_path(new_sf);
@@ -163,6 +163,7 @@ Result update_scopefile(char *name, int64_t scope_id, char *new_name, char *new_
   if (validate_rename.type == SUCCESS) {
     return (Result) { .type = SIMPLE_ERR, .value = "there are already scopefiles with the name you want to chose." };
   }
+
 
   int rename_sf = rename(path.value, new_path.value);
   if (rename_sf != 0) {

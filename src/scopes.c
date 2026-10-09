@@ -196,7 +196,7 @@ Result delete_scope(Scope s) {
   return (Result) { .type = SUCCESS, .value = "" };
 }
 
-Result update_scope(int64_t scope_id, char *new_name) {
+Result update_scope(int64_t scope_id, char *new_name, int64_t new_parent_id, int64_t new_wiki_id) {
 
   Result scope_exist_db = get_scope_db(scope_id, 0, 0, NULL);
   if (scope_exist_db.type != SUCCESS) {
@@ -220,10 +220,10 @@ Result update_scope(int64_t scope_id, char *new_name) {
 
   Scope new_s = { 
     .id = s_arr[0]->id,
-    .parent_scope_id = s_arr[0]->parent_scope_id,
+    .parent_scope_id = new_parent_id == 0 ? s_arr[0]->parent_scope_id : new_parent_id,
     .created_on = s_arr[0]->created_on,
-    .wiki_id = s_arr[0]->wiki_id,
-    .name = new_name
+    .wiki_id = new_wiki_id == 0 ? s_arr[0]->wiki_id : new_wiki_id,
+    .name = new_name == NULL ? s_arr[0]->name : new_name
   };
 
   Result new_path = build_scope_path(new_s);
