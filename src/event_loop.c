@@ -77,10 +77,6 @@ void run_event_loop(void)
     printf("Wiki created successfully.\n");
 
 
-    /* ---------------------------------------------------------
-     * Get the newly created Wiki
-     * --------------------------------------------------------- */
-
     Result get_w = get_wiki_db(w.name, 0);
 
     if (get_w.type != SUCCESS) {
